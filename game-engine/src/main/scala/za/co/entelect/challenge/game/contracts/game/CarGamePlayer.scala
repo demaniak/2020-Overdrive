@@ -112,8 +112,8 @@ class CarGamePlayer(health: Int, var score: Int, gamePlayerId: Int, var speed: I
     }
 
     def capSpeedAtMaxAllowable() = {
-        if(speed > maxSpeedState) {
-            speed = maxSpeedState
+        if(speed > calcMaxAllowableSpeed()) {
+            speed = calcMaxAllowableSpeed()
         }
     }
 
