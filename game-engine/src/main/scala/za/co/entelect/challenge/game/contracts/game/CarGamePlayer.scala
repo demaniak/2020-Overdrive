@@ -15,7 +15,7 @@ class CarGamePlayer(health: Int, var score: Int, gamePlayerId: Int, var speed: I
     private val BOOST_SPEED: Int = Config.BOOST_SPEED
     private var allSpeedStates: Array[Int] = Array(MINIMUM_SPEED, SPEED_STATE_1, INITIAL_SPEED, SPEED_STATE_2, SPEED_STATE_3, MAXIMUM_SPEED, BOOST_SPEED)
     private var allowableSpeedStates = allSpeedStates
-    private var maxSpeedState:  Int = Config.BOOST_SPEED
+//     private var maxSpeedState:  Int = Config.BOOST_SPEED
     private var damage: Int = 0;
     private val powerups: mutable.ListBuffer[String] = mutable.ListBuffer[String]()
     private var boosting: Boolean = false
@@ -81,17 +81,17 @@ class CarGamePlayer(health: Int, var score: Int, gamePlayerId: Int, var speed: I
         if (isLizarding) return
         if (item == Config.MUD_MAP_OBJECT) {
             damage += Config.DAMAGE_MUD;
-            reduceMaxAllowableSpeed()
+//             reduceMaxAllowableSpeed()
             hitMud()
         }
         if (item == Config.OIL_SPILL_MAP_OBJECT) {
             damage += Config.DAMAGE_OIL;
-            reduceMaxAllowableSpeed()
+//             reduceMaxAllowableSpeed()
             hitOil()
         }
         if (item == Config.WALL_MAP_OBJECT) {
             damage += Config.DAMAGE_WALL;
-            reduceMaxAllowableSpeed()
+//             reduceMaxAllowableSpeed()
             hitWall()
         }
         capDamageAtSix()
@@ -103,18 +103,17 @@ class CarGamePlayer(health: Int, var score: Int, gamePlayerId: Int, var speed: I
         }
     }
 
-    def reduceMaxAllowableSpeed(): Unit = {
+    def calcMaxAllowableSpeed(): Int = {
         if (allSpeedStates.length < damage){
-            maxSpeedState = MINIMUM_SPEED;
-            return;
+            return MINIMUM_SPEED ;
         }
         var maxSpeedIndex = Math.max(allSpeedStates.length - damage - 1, 0)
-        maxSpeedState = allSpeedStates(maxSpeedIndex);
+        return allSpeedStates(maxSpeedIndex);
     }
 
     def capSpeedAtMaxAllowable() = {
-        if(speed > maxSpeedState) {
-            speed = maxSpeedState
+        if(speed > calcMaxAllowableSpeed()) {
+            speed = calcMaxAllowableSpeed()
         }
     }
 
@@ -244,7 +243,7 @@ class CarGamePlayer(health: Int, var score: Int, gamePlayerId: Int, var speed: I
 
     def useBoost() = {
         powerups.subtractOne(Config.BOOST_POWERUP_ITEM)
-        speed = BOOST_SPEED
+        speed = calcMaxAllowableSpeed()
         boosting = true
         boostCounter = Config.BOOST_DURATION
         setState(Config.USED_POWERUP_BOOST_PLAYER_STATE)
@@ -276,7 +275,7 @@ class CarGamePlayer(health: Int, var score: Int, gamePlayerId: Int, var speed: I
         val boostOver = boostCounter == 0
         if (boostOver) {
             boosting = false
-            speed = MAXIMUM_SPEED
+            speed = calcMaxAllowableSpeed()
             setState(Config.NOTHING_PLAYER_STATE)
         }
     }
@@ -312,9 +311,10 @@ class CarGamePlayer(health: Int, var score: Int, gamePlayerId: Int, var speed: I
     }
 
     private def increaseSpeed() = {
-        if (!isBoosting()){
-            reduceMaxAllowableSpeed()
-        }
+        
+//         if (!isBoosting()){
+//             reduceMaxAllowableSpeed()
+//         }
         speed match {
             case MINIMUM_SPEED => speed = SPEED_STATE_1
             case SPEED_STATE_1 => speed = SPEED_STATE_2
@@ -325,8 +325,9 @@ class CarGamePlayer(health: Int, var score: Int, gamePlayerId: Int, var speed: I
             case BOOST_SPEED => speed = BOOST_SPEED
             case invalidSpeed => throw new Exception("Invalid current speed: " + invalidSpeed.toString())
         }
-        if (speed > maxSpeedState && !isBoosting()) {
-            speed = maxSpeedState;
+        var maxSpeed = calcMaxAllowableSpeed()
+        if (speed > maxSpeed && !isBoosting()) {
+            speed = maxSpeed;
         }
     }
 
@@ -370,7 +371,7 @@ class CarGamePlayer(health: Int, var score: Int, gamePlayerId: Int, var speed: I
         reduceSpeedToLevel(allowStop, Config.SPEED_STATE_1)
         updateScore(Config.HIT_CYBERTRUCK_SCORE_PENALTY)
         damage += Config.DAMAGE_CYBERTRUCK;
-        reduceMaxAllowableSpeed()
+//         reduceMaxAllowableSpeed()
     }
 
     def clearStatesThatOccurredLastRound() = {
